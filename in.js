@@ -1,151 +1,223 @@
-// Recuperar datos de localStorage al iniciar
-let inventario = JSON.parse(localStorage.getItem("inventario")) || [];
-let totalProductos = parseInt(localStorage.getItem("totalProductos")) || 0;
-let productosEliminados = parseInt(localStorage.getItem("productosEliminados")) || 0;
-let totalPrecio = parseFloat(localStorage.getItem("totalPrecio")) || 0;
+// Obtener elementos de la página
+const archivoCSV = document.getElementById("archivoCSV");
+const nombreArchivo = document.getElementById("nombreArchivo");
+const convertirBtn = document.getElementById("convertirBtn");
+const resultadoJSON = document.getElementById("resultadoJSON");
+const descargarBtn = document.getElementById("descargarBtn");
 
-// Obtener elementos del DOM
-const formProducto = document.getElementById("formProducto");
-const tablaInventario = document.querySelector("#tablaInventario tbody");
-const totalProductosElem = document.getElementById("totalProductos");
-const productosEliminadosElem = document.getElementById("productosEliminados");
-const totalPrecioElem = document.getElementById("totalPrecio");
-const listaEliminados = document.getElementById("listaEliminados");
-const resetPrecioBtn = document.getElementById("resetPrecio");
+// Variable para almacenar el archivo seleccionado
+let archivoSeleccionado = null;
 
-// Cargar los datos guardados al iniciar
-document.addEventListener("DOMContentLoaded", function () {
-    actualizarInventario();
-    actualizarResumen();
-});
+// Variable para almacenar el JSON generado
+let jsonGenerado = null;
 
-// Evento para agregar un producto
-formProducto.addEventListener("submit", function (event) {
-    event.preventDefault();
 
-    // Obtener valores del formulario
-    const nombre = document.getElementById("nombre").value.trim();
-    const cantidad = parseInt(document.getElementById("cantidad").value);
-    const precio = parseFloat(document.getElementById("precio").value);
+// Cuando el usuario selecciona un archivo
+archivoCSV.addEventListener("change", function () {
 
-    // Validar datos
-    if (!nombre || isNaN(cantidad) || isNaN(precio) || cantidad <= 0 || precio <= 0) {
-        alert("Por favor, ingrese datos válidos.");
+    archivoSeleccionado = archivoCSV.files[0];
+
+    if (!archivoSeleccionado) {
+        nombreArchivo.textContent = "Ningún archivo seleccionado";
+        convertirBtn.disabled = true;
         return;
     }
 
-    // Crear objeto producto
-    const producto = { nombre, cantidad, precio };
+    // Verificar que sea un archivo CSV
+    if (!archivoSeleccionado.name.toLowerCase().endsWith(".csv")) {
+        alert("Por favor, seleccione un archivo CSV.");
+        archivoCSV.value = "";
+        nombreArchivo.textContent = "Ningún archivo seleccionado";
+        convertirBtn.disabled = true;
+        return;
+    }
 
-    // Agregar al inventario
-    inventario.push(producto);
-    totalProductos++;
-    totalPrecio += precio * cantidad; // Ajustar el total correctamente
+    nombreArchivo.textContent =
+        `Archivo seleccionado: ${archivoSeleccionado.name}`;
 
-    // Guardar en LocalStorage y actualizar la UI
-    guardarDatos();
-    actualizarInventario();
-    actualizarResumen();
+    convertirBtn.disabled = false;
 
-    // Limpiar el formulario
-    formProducto.reset();
+    // Limpiar resultados anteriores
+    resultadoJSON.textContent =
+        "El archivo está listo para ser convertido.";
+
+    descargarBtn.disabled = true;
 });
 
-// Función para actualizar la tabla de inventario
-function actualizarInventario() {
-    tablaInventario.innerHTML = "";
 
-    inventario.forEach((producto, index) => {
-        const fila = document.createElement("tr");
-        fila.innerHTML = `
-            <td>${producto.nombre}</td>
-            <td>${producto.cantidad}</td>
-            <td>$${producto.precio.toFixed(2)}</td>
-            <td>
-                <button onclick="editarProducto(${index})">✏️ Editar</button>
-                <button onclick="eliminarProducto(${index})">🗑️ Eliminar</button>
-            </td>
-        `;
-        tablaInventario.appendChild(fila);
-    });
+// Cuando se presiona el botón de convertir
+convertirBtn.addEventListener("click", function () {
 
-    // Guardar los datos en localStorage después de actualizar la tabla
-    guardarDatos();
-}
-
-// Función para eliminar un producto
-function eliminarProducto(index) {
-    if (index >= 0 && index < inventario.length) {
-        const productoEliminado = inventario[index].nombre;
-        totalPrecio -= inventario[index].precio * inventario[index].cantidad;
-        inventario.splice(index, 1);
-        totalProductos--;
-        productosEliminados++;
-
-        // Agregar a la lista de eliminados
-        const itemEliminado = document.createElement("li");
-        itemEliminado.textContent = productoEliminado;
-        listaEliminados.appendChild(itemEliminado);
-
-        // Guardar cambios en localStorage y actualizar la UI
-        guardarDatos();
-        actualizarInventario();
-        actualizarResumen();
+    if (!archivoSeleccionado) {
+        alert("Primero seleccione un archivo CSV.");
+        return;
     }
-}
 
-// Función para editar un producto
-function editarProducto(index) {
-    const nuevoNombre = prompt("Nuevo nombre:", inventario[index].nombre);
-    const nuevaCantidad = prompt("Nueva cantidad:", inventario[index].cantidad);
-    const nuevoPrecio = prompt("Nuevo precio:", inventario[index].precio);
+    // Leer el contenido del archivo
+    const lector = new FileReader();
 
-    if (nuevoNombre && !isNaN(nuevaCantidad) && !isNaN(nuevoPrecio)) {
-        totalPrecio -= inventario[index].precio * inventario[index].cantidad; // Restar precio anterior
-        inventario[index].nombre = nuevoNombre;
-        inventario[index].cantidad = parseInt(nuevaCantidad);
-        inventario[index].precio = parseFloat(nuevoPrecio);
-        totalPrecio += inventario[index].precio * inventario[index].cantidad; // Sumar nuevo precio
+    lector.onload = function (evento) {
 
-        // Guardar cambios y actualizar la UI
-        guardarDatos();
-        actualizarInventario();
-        actualizarResumen();
-    } else {
-        alert("Entrada no válida. Inténtelo de nuevo.");
+        const contenidoCSV = evento.target.result;
+
+        try {
+
+            // Convertir CSV a JSON
+            const datos = convertirCSVaJSON(contenidoCSV);
+
+            // Guardar el resultado
+            jsonGenerado = JSON.stringify(datos, null, 4);
+
+            // Mostrar el resultado
+            resultadoJSON.textContent = jsonGenerado;
+
+            // Activar botón de descarga
+            descargarBtn.disabled = false;
+
+        } catch (error) {
+
+            resultadoJSON.textContent =
+                "Error al convertir el archivo.";
+
+            alert("No se pudo convertir el archivo CSV.");
+            console.error(error);
+        }
+    };
+
+    lector.onerror = function () {
+        alert("No se pudo leer el archivo.");
+    };
+
+    lector.readAsText(archivoSeleccionado, "UTF-8");
+});
+
+
+// Función principal para convertir CSV a JSON
+function convertirCSVaJSON(csv) {
+
+    // Eliminar espacios y saltos de línea innecesarios
+    csv = csv.trim();
+
+    if (!csv) {
+        throw new Error("El archivo CSV está vacío.");
     }
+
+    // Separar el archivo en líneas
+    const lineas = csv.split(/\r?\n/);
+
+    if (lineas.length < 2) {
+        throw new Error(
+            "El archivo CSV debe tener encabezados y al menos un registro."
+        );
+    }
+
+    // Obtener los encabezados de la primera línea
+    const encabezados = separarCSV(lineas[0]);
+
+    // Crear arreglo donde se guardarán los objetos
+    const datos = [];
+
+    // Recorrer las filas restantes
+    for (let i = 1; i < lineas.length; i++) {
+
+        // Ignorar líneas vacías
+        if (lineas[i].trim() === "") {
+            continue;
+        }
+
+        const valores = separarCSV(lineas[i]);
+
+        const objeto = {};
+
+        // Relacionar cada valor con su encabezado
+        encabezados.forEach(function (encabezado, indice) {
+
+            objeto[encabezado.trim()] =
+                valores[indice] !== undefined
+                    ? valores[indice].trim()
+                    : "";
+
+        });
+
+        datos.push(objeto);
+    }
+
+    return datos;
 }
 
-// Función para actualizar los contadores en pantalla
-function actualizarResumen() {
-    totalProductosElem.textContent = `Total de productos: ${totalProductos}`;
-    productosEliminadosElem.textContent = `Productos eliminados: ${productosEliminados}`;
-    totalPrecioElem.textContent = `Total en precio: $${totalPrecio.toFixed(2)}`;
+
+// Función para separar correctamente una línea CSV
+// También permite valores entre comillas
+function separarCSV(linea) {
+
+    const valores = [];
+    let valorActual = "";
+    let dentroDeComillas = false;
+
+    for (let i = 0; i < linea.length; i++) {
+
+        const caracter = linea[i];
+
+        if (caracter === '"') {
+
+            // Si hay dos comillas juntas, representan una comilla
+            if (dentroDeComillas && linea[i + 1] === '"') {
+                valorActual += '"';
+                i++;
+            } else {
+                dentroDeComillas = !dentroDeComillas;
+            }
+
+        } else if (caracter === "," && !dentroDeComillas) {
+
+            valores.push(valorActual);
+            valorActual = "";
+
+        } else {
+
+            valorActual += caracter;
+        }
+    }
+
+    // Agregar el último valor
+    valores.push(valorActual);
+
+    return valores;
 }
 
-// Función para resetear el inventario
-function resetearTotalPrecio() {
-    totalPrecio = 0;
-    totalProductos = 0;
-    productosEliminados = 0;
-    inventario = [];
 
-    // Limpiar la lista de productos eliminados
-    listaEliminados.innerHTML = "";
+// Descargar el JSON generado
+descargarBtn.addEventListener("click", function () {
 
-    // Guardar cambios en LocalStorage y actualizar la UI
-    guardarDatos();
-    actualizarInventario();
-    actualizarResumen();
-}
+    if (!jsonGenerado) {
+        alert("Primero debe convertir un archivo CSV.");
+        return;
+    }
 
-// Evento para el botón de resetear precio
-resetPrecioBtn.addEventListener("click", resetearTotalPrecio);
+    // Crear un archivo JSON en memoria
+    const archivoJSON = new Blob(
+        [jsonGenerado],
+        { type: "application/json" }
+    );
 
-// Función para guardar los datos en LocalStorage
-function guardarDatos() {
-    localStorage.setItem("inventario", JSON.stringify(inventario));
-    localStorage.setItem("totalProductos", totalProductos);
-    localStorage.setItem("productosEliminados", productosEliminados);
-    localStorage.setItem("totalPrecio", totalPrecio);
-}
+    // Crear una URL temporal
+    const url = URL.createObjectURL(archivoJSON);
+
+    // Crear enlace de descarga
+    const enlace = document.createElement("a");
+
+    enlace.href = url;
+
+    // Obtener nombre del CSV y cambiar extensión
+    let nombreJSON = archivoSeleccionado.name
+        .replace(/\.csv$/i, "")
+        + ".json";
+
+    enlace.download = nombreJSON;
+
+    // Ejecutar descarga
+    enlace.click();
+
+    // Liberar la URL temporal
+    URL.revokeObjectURL(url);
+});
