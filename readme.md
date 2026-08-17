@@ -20,7 +20,7 @@ La aplicación permite:
 
 CSV
 
-## Formato de entrada
+## Formato de salida
 
 JSON
 
