@@ -20,6 +20,10 @@ La aplicación permite:
 
 CSV
 
+## Formato de entrada
+
+JSON
+
 Ejemplo:
 
 ```csv
