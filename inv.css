@@ -1,0 +1,53 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+body{
+     font-family: 'Times New Roman', Times, serif;
+     text-align: center;
+    }
+    .gest{
+     background-color: rgb(145, 255, 130);
+    }
+    input{
+     margin:20px ;
+     margin: 5px;
+     padding: 10px;
+     border-radius: 20px;
+    }
+    button{
+    cursor: pointer;
+    background-color: rgb(241, 0, 0);
+     border-radius: 10px;
+     
+    }
+    th{
+    margin: 20px;
+    padding: 20px;
+    border-radius: 20px 20px;
+    
+    }
+    .no{
+    background-color: rgb(201, 209, 153);
+    }
+    .ca{
+    background-color:rgb(201, 209, 153);
+    }
+    .pre{
+     background-color: rgb(201, 209, 153);
+    }
+    .acc{
+    background-color: rgb(201, 209, 153);
+    }
+    
+table {
+    width: 100%;
+   
+}
+th, td {
+    border: 1px solid rgb(214, 207, 183);
+    padding: 10px;
+}
+button {
+    cursor: pointer;
+}
