@@ -3,45 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventario de Ropa</title>
+    <title>Conversor de Archivos - CSV a JSON</title>
     <link rel="stylesheet" href="inv.css">
 </head>
+
 <body>
-    <div class="gest"><h1>Gestión de Inventario</h1></div>
 
-    <!-- Formulario para agregar productos -->
-    <form id="formProducto">
-        <input type="text" id="nombre" placeholder="Nombre de la prenda" required>
-        <input type="number" id="cantidad" placeholder="Cantidad" required>
-        <input type="text" id="precio" placeholder="Precio" required>
-        <button type="submit">Agregar Producto</button>
-    </form>
-    
-    <!-- Tabla para mostrar productos -->
-    <table id="tablaInventario">
-        <thead>
-            <tr>
-                <th class="no">Nombre</th>
-                <th class="ca">Cantidad</th>
-                <th class="pre">Precio</th>
-                <th class="acc">Acciones</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div class="contenedor">
 
-    <!-- Resumen de productos y acciones -->
-    <div id="resumen">
-        <p id="totalProductos">Total de productos: 0</p>
-        <p id="productosEliminados">Productos eliminados: 0</p>
-        <p id="totalPrecio">Total en precio: $0.00</p>
-        <button id="resetPrecio">Restablecer Total en Precio</button>
+        <header>
+            <h1>Conversor de Archivos</h1>
+            <p>Conversión de archivos CSV a JSON</p>
+        </header>
+
+        <main>
+
+            <section class="carga">
+                <h2>1. Seleccionar archivo CSV</h2>
+
+                <input
+                    type="file"
+                    id="archivoCSV"
+                    accept=".csv,text/csv"
+                >
+
+                <p id="nombreArchivo">Ningún archivo seleccionado</p>
+            </section>
+
+
+            <section class="acciones">
+                <h2>2. Convertir archivo</h2>
+
+                <button id="convertirBtn" disabled>
+                    Convertir CSV → JSON
+                </button>
+            </section>
+
+
+            <section class="resultado">
+                <h2>3. Resultado</h2>
+
+                <pre id="resultadoJSON">Aquí aparecerá el JSON generado...</pre>
+
+                <button id="descargarBtn" disabled>
+                    Descargar JSON
+                </button>
+            </section>
+
+        </main>
+
+        <footer>
+            <p>Mini Proyecto Archivos | CSV → JSON</p>
+        </footer>
+
     </div>
 
-    <!-- Lista de productos eliminados -->
-    <h2>Productos Eliminados</h2>
-    <ul id="listaEliminados"></ul>
-
     <script src="in.js"></script>
+
 </body>
 </html>
